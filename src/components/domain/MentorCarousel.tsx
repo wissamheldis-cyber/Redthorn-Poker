@@ -3,177 +3,221 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MENTORS } from "@/mock-data/mentors";
-import { ChevronLeft, ChevronRight, BarChart3, Fingerprint, Crosshair, BrainCircuit, Activity } from "lucide-react";
+import { ChevronLeft, ChevronRight, BarChart3, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
-
-// Helper to get an icon based on the mentor id or stat index
-const getStatIcon = (index: number) => {
-  switch (index) {
-    case 0: return <Activity className="w-4 h-4 text-primary" />;
-    case 1: return <Crosshair className="w-4 h-4 text-primary" />;
-    default: return <BrainCircuit className="w-4 h-4 text-primary" />;
-  }
-};
 
 export function MentorCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % MENTORS.length);
-  };
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => (prev - 1 + MENTORS.length) % MENTORS.length);
-  };
+  const handleNext = () => setActiveIndex((p) => (p + 1) % MENTORS.length);
+  const handlePrev = () => setActiveIndex((p) => (p - 1 + MENTORS.length) % MENTORS.length);
 
   const activeMentor = MENTORS[activeIndex];
 
   return (
-    <div className="relative w-full py-12 pb-24 flex flex-col items-center overflow-hidden">
-      
-      {/* 3D Carousel Stage */}
-      <div className="relative h-[450px] w-full max-w-6xl mx-auto flex items-center justify-center perspective-[1200px]">
+    <div className="relative w-full py-8 pb-16 flex flex-col items-center overflow-hidden">
+
+      {/* ── Carousel 3D ── */}
+      <div className="relative h-[380px] w-full max-w-5xl mx-auto flex items-center justify-center" style={{ perspective: "1100px" }}>
         <AnimatePresence initial={false} mode="popLayout">
           {MENTORS.map((mentor, index) => {
             const isActive = index === activeIndex;
-            // Calculate distance from active
-            let distance = index - activeIndex;
-            // Handle wrap-around for visual continuity
-            if (distance > MENTORS.length / 2) distance -= MENTORS.length;
-            if (distance < -MENTORS.length / 2) distance += MENTORS.length;
-
-            const isVisible = Math.abs(distance) <= 2; // Show only nearest 2 on each side
-
-            if (!isVisible) return null;
+            let dist = index - activeIndex;
+            if (dist > MENTORS.length / 2) dist -= MENTORS.length;
+            if (dist < -MENTORS.length / 2) dist += MENTORS.length;
+            if (Math.abs(dist) > 2) return null;
 
             return (
               <motion.div
                 key={mentor.id}
                 layout
-                initial={{ opacity: 0, x: distance > 0 ? 200 : -200, scale: 0.8 }}
+                initial={{ opacity: 0, x: dist > 0 ? 200 : -200, scale: 0.8 }}
                 animate={{
-                  opacity: isActive ? 1 : 0.4,
-                  x: distance * 220, // Spread items horizontally
-                  z: isActive ? 100 : -Math.abs(distance) * 150, // Push inactive items back
-                  scale: isActive ? 1.1 : 0.8,
-                  rotateY: distance * -25, // Angle items towards center
-                  filter: isActive ? "blur(0px)" : `blur(${Math.abs(distance) * 3}px)`,
+                  opacity: isActive ? 1 : 0.35,
+                  x: dist * 210,
+                  z: isActive ? 80 : -Math.abs(dist) * 140,
+                  scale: isActive ? 1.08 : 0.78,
+                  rotateY: dist * -22,
+                  filter: isActive ? "blur(0px)" : `blur(${Math.abs(dist) * 2.5}px)`,
                 }}
                 exit={{ opacity: 0, scale: 0.5, z: -300 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25, mass: 1 }}
-                className={`absolute w-[320px] h-[400px] flex flex-col items-center justify-center cursor-pointer ${isActive ? 'z-50' : 'z-auto'}`}
+                transition={{ type: "spring", stiffness: 220, damping: 26 }}
+                className={`absolute w-[300px] h-[360px] flex flex-col items-center justify-end cursor-pointer ${isActive ? "z-50" : "z-auto"}`}
                 onClick={() => setActiveIndex(index)}
               >
-                {/* Visual Representation of Mentor (Transparent Image) */}
-                <div className="relative w-full h-[350px] flex items-end justify-center drop-shadow-2xl">
-                   {/* Fallback glow behind the character */}
-                   {isActive && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-primary/20 rounded-full blur-[60px] -z-10" />}
-                   <img 
-                      src={mentor.imageSrc} 
-                      onError={(e) => { e.currentTarget.src = mentor.fallbackSrc }}
-                      alt={mentor.name} 
-                      className="max-h-full object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
-                    />
-                </div>
+                {/* Halo de couleur derrière l'actif */}
+                {isActive && (
+                  <div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 rounded-full blur-[70px] -z-10 pointer-events-none"
+                    style={{ background: `${mentor.accentColor}28` }}
+                  />
+                )}
+
+                <img
+                  src={mentor.imageSrc}
+                  onError={(e) => { e.currentTarget.src = mentor.fallbackSrc; }}
+                  alt={mentor.name}
+                  className="w-full h-full object-cover object-top rounded-lg"
+                  style={{
+                    boxShadow: isActive
+                      ? `0 24px 60px rgba(0,0,0,0.60), 0 0 0 1px ${mentor.accentColor}30`
+                      : "0 8px 20px rgba(0,0,0,0.40)",
+                  }}
+                />
+
+                {/* Nom en bas de la carte active */}
+                {isActive && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0 p-4 rounded-b-lg"
+                    style={{
+                      background: "linear-gradient(to top, rgba(8,3,1,0.92) 0%, transparent 100%)",
+                    }}
+                  >
+                    <p className="font-display text-sm font-semibold text-center" style={{ color: "#F0E6D0" }}>
+                      {mentor.name}
+                    </p>
+                    <p className="text-[10px] text-center tracking-wider uppercase mt-0.5" style={{ color: mentor.accentColor }}>
+                      {mentor.role}
+                    </p>
+                  </div>
+                )}
               </motion.div>
             );
           })}
         </AnimatePresence>
 
-        {/* Navigation Controls */}
-        <button 
-          onClick={handlePrev} 
-          className="absolute left-4 md:left-12 z-50 p-4 rounded-full bg-white/60 backdrop-blur-md border border-white/80 shadow-lg text-slate-800 hover:bg-white hover:scale-110 transition-all"
+        {/* Navigation */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-4 md:left-8 z-50 p-3 rounded-full transition-all"
+          style={{
+            background: "rgba(18,9,4,0.90)",
+            border: "1px solid rgba(196,132,58,0.18)",
+            color: "#C8B89A",
+          }}
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <button 
-          onClick={handleNext} 
-          className="absolute right-4 md:right-12 z-50 p-4 rounded-full bg-white/60 backdrop-blur-md border border-white/80 shadow-lg text-slate-800 hover:bg-white hover:scale-110 transition-all"
+        <button
+          onClick={handleNext}
+          className="absolute right-4 md:right-8 z-50 p-3 rounded-full transition-all"
+          style={{
+            background: "rgba(18,9,4,0.90)",
+            border: "1px solid rgba(196,132,58,0.18)",
+            color: "#C8B89A",
+          }}
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Active Mentor Descriptive Dashboard */}
-      <motion.div 
+      {/* ── Fiche mentor active ── */}
+      <motion.div
         key={`desc-${activeMentor.id}`}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="w-full max-w-4xl mx-auto mt-8 px-4"
+        transition={{ duration: 0.45, delay: 0.15 }}
+        className="w-full max-w-4xl mx-auto mt-6 px-4"
       >
-        <div className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden">
-           {/* Decorative background element */}
-           <div className="absolute -top-32 -right-32 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-           
-           <div className="flex flex-col md:flex-row gap-8 relative z-10">
-              {/* Core Description Block */}
-              <div className="flex-1 space-y-4">
-                 <div className="flex items-center gap-3 mb-2">
-                    <Fingerprint className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-bold text-primary tracking-widest uppercase">{activeMentor.role}</span>
-                 </div>
-                 <h2 className="text-4xl font-extrabold text-slate-800 tracking-tight">{activeMentor.name}</h2>
-                 <p className="text-lg italic font-medium text-slate-600 border-l-4 border-primary/40 pl-4 py-1">
-                   "{activeMentor.motto}"
-                 </p>
-                 <p className="text-slate-600 leading-relaxed font-light">
-                   {activeMentor.philosophy}
-                 </p>
-              </div>
+        <div
+          className="rounded-xl p-7 relative overflow-hidden"
+          style={{
+            background: "rgba(18, 9, 4, 0.90)",
+            border: `1px solid ${activeMentor.accentColor}28`,
+            boxShadow: `0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 ${activeMentor.accentColor}12`,
+          }}
+        >
+          {/* Barre couleur accent en haut */}
+          <div
+            className="absolute top-0 left-0 right-0 h-[2px]"
+            style={{ background: `linear-gradient(90deg, transparent, ${activeMentor.accentColor}70, transparent)` }}
+          />
 
-              {/* Dynamic Stats Grid */}
-              <div className="flex-1 min-w-[300px] flex flex-col justify-center gap-3">
-                 <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-2 flex items-center gap-2">
-                   <BarChart3 className="w-4 h-4 text-primary" /> Impact Estimé
-                 </h3>
-                 {activeMentor.stats.map((stat, idx) => (
-                    <motion.div 
-                      key={idx}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.3 + (idx * 0.1) }}
-                      className="flex items-center justify-between bg-white/50 border border-white/60 p-3 rounded-xl shadow-sm"
-                    >
-                      <span className="flex items-center gap-2 text-slate-700 text-sm font-medium">
-                        {getStatIcon(idx)} {stat.label}
-                      </span>
-                      <span className="font-bold text-slate-900">{stat.value}</span>
-                    </motion.div>
-                 ))}
+          <div className="flex flex-col md:flex-row gap-8 relative z-10">
+            {/* Description */}
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-2">
+                <Fingerprint className="w-4 h-4" style={{ color: activeMentor.accentColor }} />
+                <span className="text-xs font-medium tracking-[0.18em] uppercase" style={{ color: activeMentor.accentColor }}>
+                  {activeMentor.role}
+                </span>
               </div>
-           </div>
+              <h2 className="font-display text-3xl font-semibold" style={{ color: "#F0E6D0" }}>
+                {activeMentor.name}
+              </h2>
+              <p
+                className="text-base italic font-light pl-4 py-1"
+                style={{
+                  color: "#C8B89A",
+                  borderLeft: `3px solid ${activeMentor.accentColor}50`,
+                }}
+              >
+                "{activeMentor.motto}"
+              </p>
+              <p className="text-sm leading-relaxed font-sans" style={{ color: "#6A5042" }}>
+                {activeMentor.philosophy}
+              </p>
+            </div>
 
-           {/* The "Atypical Personalized Box" requested by the user */}
-           <motion.div 
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={{ opacity: 1, scale: 1 }}
-             transition={{ duration: 0.5, delay: 0.5 }}
-             className="mt-8 bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group"
-           >
-              {/* Edge glow effect */}
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-              <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                 <h4 className="text-primary text-xs font-bold uppercase tracking-widest mb-2">Recommandation du Système (Smart Analysis)</h4>
-                 <h3 className="text-white text-xl font-semibold mb-3 flex items-center gap-2">
-                    Pourquoi choisir {activeMentor.name} ?
-                 </h3>
-                 <p className="text-slate-300 text-sm leading-relaxed font-light">
-                    {activeMentor.whyThisMentor}
-                 </p>
-                 <button 
-                  onClick={() => toast.info("Disponibilité Limitée", { description: `${activeMentor.name} analyse actuellement d'autres joueurs. Cette fonctionnalité (MVP) sera ouverte en V1.` })}
-                  className="mt-4 text-xs font-semibold text-primary hover:text-white transition-colors flex items-center gap-1"
-                 >
-                   Démarrer une session avec ce mentor <ChevronRight className="w-3 h-3" />
-                 </button>
-              </div>
-           </motion.div>
+            {/* Stats */}
+            <div className="flex-1 min-w-[260px] flex flex-col justify-center gap-3">
+              <h3 className="text-xs font-medium tracking-[0.18em] uppercase mb-1 flex items-center gap-2" style={{ color: "#6A5042" }}>
+                <BarChart3 className="w-3.5 h-3.5" /> Impact Estimé
+              </h3>
+              {activeMentor.stats.map((stat, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: 14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.2 + idx * 0.08 }}
+                  className="flex items-center justify-between px-4 py-3 rounded"
+                  style={{
+                    background: "rgba(12,6,2,0.60)",
+                    border: "1px solid rgba(196,132,58,0.08)",
+                  }}
+                >
+                  <span className="text-sm font-sans" style={{ color: "#8A7060" }}>{stat.label}</span>
+                  <span className="text-sm font-semibold font-sans" style={{ color: activeMentor.accentColor }}>
+                    {stat.value}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recommandation */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45, delay: 0.4 }}
+            className="mt-6 p-5 rounded relative overflow-hidden"
+            style={{
+              background: "rgba(10,5,2,0.70)",
+              border: `1px solid ${activeMentor.accentColor}18`,
+              borderLeft: `2px solid ${activeMentor.accentColor}55`,
+            }}
+          >
+            <p className="text-[10px] font-medium tracking-[0.20em] uppercase mb-2" style={{ color: activeMentor.accentColor }}>
+              Recommandation
+            </p>
+            <p className="text-sm leading-relaxed font-sans" style={{ color: "#8A7060" }}>
+              {activeMentor.whyThisMentor}
+            </p>
+            <button
+              onClick={() =>
+                toast.info("Session bientôt disponible", {
+                  description: `${activeMentor.name} sera disponible en V1.`,
+                })
+              }
+              className="mt-3 text-xs font-medium flex items-center gap-1 transition-opacity hover:opacity-80"
+              style={{ color: activeMentor.accentColor }}
+            >
+              Démarrer une session <ChevronRight className="w-3 h-3" />
+            </button>
+          </motion.div>
         </div>
       </motion.div>
     </div>
   );
 }
+

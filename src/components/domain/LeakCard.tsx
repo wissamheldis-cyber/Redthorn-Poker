@@ -19,6 +19,11 @@ const SEVERITY = {
     border: "rgba(155, 37, 53, 0.30)",
     text: "#F0AABB",
     icon: "#9B2535",
+    // Popup : Le Prédateur — design "alerte" rouge
+    modalChar: "/images/Gemini_Generated_Image_80g3lm80g3lm80g3.png",
+    modalLabel: "ALERTE CRITIQUE",
+    modalAccent: "#9B2535",
+    modalHeaderBg: "linear-gradient(135deg, rgba(80,10,18,0.95), rgba(20,5,3,0.98))",
   },
   medium: {
     label: "Moyen",
@@ -26,6 +31,11 @@ const SEVERITY = {
     border: "rgba(196, 132, 58, 0.28)",
     text: "#D4944A",
     icon: "#C4843A",
+    // Popup : La Calculatrice — design "analyse" ambre
+    modalChar: "/images/Gemini_Generated_Image_h4g9jch4g9jch4g9.png",
+    modalLabel: "ANALYSE GTO",
+    modalAccent: "#C4843A",
+    modalHeaderBg: "linear-gradient(135deg, rgba(60,35,5,0.95), rgba(18,9,2,0.98))",
   },
   low: {
     label: "Faible",
@@ -33,6 +43,11 @@ const SEVERITY = {
     border: "rgba(80, 140, 80, 0.22)",
     text: "#80B080",
     icon: "#60A060",
+    // Popup : La Stoïque — design "note" sobre vert/neutre
+    modalChar: "/images/Gemini_Generated_Image_19vrl519vrl519vr.png",
+    modalLabel: "POINT D'ATTENTION",
+    modalAccent: "#6A8060",
+    modalHeaderBg: "linear-gradient(135deg, rgba(20,35,15,0.95), rgba(10,14,8,0.98))",
   },
 };
 
@@ -127,30 +142,49 @@ export function LeakCard({ title, description, severity, costEstimate, frequency
       <GlassModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={`Analyse : ${title}`}
-        nashMood={severity === "high" ? "warning" : "coaching"}
+        title={`${cfg.modalLabel} — ${title}`}
+        nashImageSrc={cfg.modalChar}
       >
         <div className="space-y-5 font-sans">
+          {/* Badge sévérité */}
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className="text-[10px] font-semibold tracking-[0.20em] uppercase px-3 py-1 rounded"
+              style={{
+                background: cfg.bg,
+                border: `1px solid ${cfg.border}`,
+                color: cfg.text,
+              }}
+            >
+              {cfg.label}
+            </span>
+            <span className="text-[10px] tracking-widest uppercase" style={{ color: cfg.icon, opacity: 0.7 }}>
+              Redthorn Analysis
+            </span>
+          </div>
+
+          {/* Impact financier */}
           <div
             className="flex gap-4 p-4 rounded"
             style={{
-              background: "rgba(155,37,53,0.10)",
-              border: "1px solid rgba(155,37,53,0.20)",
+              background: `${cfg.modalAccent}14`,
+              border: `1px solid ${cfg.modalAccent}30`,
             }}
           >
-            <Activity className="w-6 h-6 flex-shrink-0 mt-0.5" style={{ color: "#9B2535" }} />
+            <Activity className="w-6 h-6 flex-shrink-0 mt-0.5" style={{ color: cfg.modalAccent }} />
             <div>
               <h4 className="text-sm font-semibold mb-1" style={{ color: "#F0E6D0" }}>
                 Impact Financier Estimé
               </h4>
               <p className="text-xs leading-relaxed" style={{ color: "#8A7060" }}>
                 Ce leak vous coûte environ{" "}
-                <strong style={{ color: "#C4843A" }}>{costEstimate || "15 bb/100"}</strong>.
+                <strong style={{ color: cfg.modalAccent }}>{costEstimate || "15 bb/100"}</strong>.
                 C'est une priorité de correction identifiée par Redthorn.
               </p>
             </div>
           </div>
 
+          {/* Pattern identifié */}
           <div>
             <h4 className="text-sm font-semibold mb-2" style={{ color: "#F0E6D0" }}>
               Pattern Identifié
@@ -160,14 +194,16 @@ export function LeakCard({ title, description, severity, costEstimate, frequency
               Vous avez tendance à{" "}
               {severity === "high"
                 ? "sur-défendre vos blindes hors de position avec des ranges marginaux"
-                : "jouer trop passivement face aux check-raises sur les boards connectés"}.
+                : severity === "medium"
+                ? "jouer trop passivement face aux check-raises sur les boards connectés"
+                : "négliger vos sizing d'ouverture en position tardive"}.
             </p>
             <div
               className="p-4 rounded italic text-xs"
               style={{
                 background: "rgba(12, 6, 2, 0.60)",
-                border: "1px solid rgba(196, 132, 58, 0.09)",
-                borderLeft: "2px solid rgba(196, 132, 58, 0.35)",
+                border: `1px solid ${cfg.modalAccent}12`,
+                borderLeft: `2px solid ${cfg.modalAccent}55`,
                 color: "#8A7060",
               }}
             >
@@ -175,6 +211,20 @@ export function LeakCard({ title, description, severity, costEstimate, frequency
               Votre fréquence de fold sur les 10 dernières sessions est de 38%."
             </div>
           </div>
+
+          {/* Fréquence */}
+          {frequency && (
+            <div
+              className="flex items-center justify-between px-4 py-3 rounded"
+              style={{
+                background: "rgba(12,6,2,0.50)",
+                border: `1px solid ${cfg.modalAccent}10`,
+              }}
+            >
+              <span className="text-xs" style={{ color: "#6A5042" }}>Fréquence observée</span>
+              <span className="text-sm font-semibold" style={{ color: cfg.modalAccent }}>{frequency}</span>
+            </div>
+          )}
         </div>
       </GlassModal>
     </>
