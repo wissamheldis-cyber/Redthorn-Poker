@@ -443,7 +443,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
           {[
             { img: "Gemini_Generated_Image_19vrl519vrl519vr", name: "La Stoïque",      role: "Sang-froid" },
-            { img: "Gemini_Generated_Image_bkm2embkm2embkm2", name: "La Calculatrice", role: "GTO & Calcul" },
+            { img: "Gemini_Generated_Image_h4g9jch4g9jch4g9", name: "La Calculatrice", role: "GTO & Calcul" },
             { img: "Gemini_Generated_Image_80g3lm80g3lm80g3", name: "Le Prédateur",    role: "Pression" },
             { img: "Gemini_Generated_Image_x807kgx807kgx807", name: "Le Lecteur",      role: "Psychologie" },
             { img: "Gemini_Generated_Image_ydpradydpradydpr", name: "Le Chaos",        role: "Variance" },
