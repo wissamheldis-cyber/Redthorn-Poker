@@ -1,16 +1,30 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowRight, BarChart3, Crosshair, BrainCircuit, ShieldAlert, Cpu, Activity } from "lucide-react";
 import { LeakCard } from "@/components/domain/LeakCard";
 import { StatCard } from "@/components/domain/StatCard";
+import { LoadingScreen } from "@/components/layout/LoadingScreen";
 
 export default function LandingPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 4200);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div
       className="min-h-screen font-sans"
       style={{ color: "#F0E6D0", background: "#0D0806" }}
     >
+      {/* ============ LOADING SCREEN ============ */}
+      <LoadingScreen isVisible={isLoading} />
+
       {/* ============ HEADER ============ */}
       <header
         className="fixed top-0 w-full z-50 flex items-center justify-between px-8 lg:px-14 h-[72px]"
